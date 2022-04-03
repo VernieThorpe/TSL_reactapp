@@ -2,7 +2,7 @@
   "name": "reactapp",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://127.0.0.1:5000/",
+  "proxy": "http://54.147.157.233:8080/",
   "dependencies": {
     "@auth0/auth0-react": "^1.9.0",
     "@emotion/react": "^11.8.1",
