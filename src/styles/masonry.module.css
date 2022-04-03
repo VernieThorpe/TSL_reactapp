@@ -1,0 +1,12 @@
+.mymasonrygrid {
+  display: flex;
+  width: 1384px;
+}
+.mymasonrygrid_column {
+  padding-left: 20px; /* gutter size */
+}
+
+.mymasonrygrid_column > div {
+  /* change div to reference your elements you put in <Masonry> */
+  margin-bottom: 20px;
+}
