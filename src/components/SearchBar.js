@@ -61,7 +61,7 @@ export default function SearchBar(props) {
         />
 
         <Button onClick={() => props.changeWord(data)}>Search</Button>
-        <IconButton sx={{ p: '10px' }} disableRipple href='/CardPage'>
+        <IconButton sx={{ p: '10px' }} disableRipple href='/card-page'>
           <SearchIcon />
         </IconButton>
       </Paper>

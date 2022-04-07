@@ -23,6 +23,9 @@ import Link from '@mui/material/Link';
 import Popper from '@mui/material/Popper';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Masonry from 'react-masonry-css';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { CardActionArea } from '@mui/material';
 
 function Item(props) {
   const { sx, ...other } = props;
@@ -67,6 +70,37 @@ Item.propTypes = {
   ]),
 };
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      // blue primary
+      main: '#ee5b2b',
+      contrastText: '#fff',
+    },
+    secondary: {
+      // purple secondary
+      main: '#6e62f9',
+    },
+    error: {
+      // red error
+      main: '#f4365d',
+    },
+  },
+  spacing: 10,
+  divider: 'rgba(0,55,30,0.31)',
+  shape: {
+    borderRadius: 6,
+  },
+  typography: {
+    fontSize: 14,
+    fontFamily: 'Lotto',
+    fontWeightBold: 800,
+    fontWeightLight: 200,
+    fontWeightRegular: 400,
+    fontWeightMedium: 500,
+  },
+});
+
 export default function CardPage(props) {
   const [posts, setPosts] = useState([]);
 
@@ -96,6 +130,7 @@ export default function CardPage(props) {
   const [data1, setData1] = useState('');
   const [newWord, setNewWord] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(false);
 
   function getData(val) {
     setData1(val.target.value);
@@ -104,6 +139,8 @@ export default function CardPage(props) {
 
   const onSubmit = () => {
     setNewWord(data1);
+    setLoading(true);
+    setPage(true);
   };
 
   /*
@@ -140,9 +177,8 @@ export default function CardPage(props) {
 
   useEffect(() => {
     async function getThePosts() {
-      setLoading(true);
       const response = await fetch(
-        'http://54.147.157.233:8080/socialsearcher/' + newWord
+        'http://35.173.233.42:8080/socialsearcher/' + newWord
       );
 
       const res = response.json();
@@ -171,33 +207,83 @@ export default function CardPage(props) {
   }, [newWord]);
 
   return (
-    <div>
-      <Box
-        display='flex'
-        sx={{
-          background: 'linear-gradient(to top, #ffede4, #f1f1f1)',
-          pt: 4,
-          pb: 4,
-        }}
-      >
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+
+      <div>
         <Box
-          container
-          m='auto'
           display='flex'
-          spacing={0}
-          alignItems='center'
-          justifyContent='center'
+          sx={{
+            background: 'linear-gradient(to top, #ffede4, #fff)',
+            pt: 4,
+            pb: 4,
+          }}
         >
-          <Container>
-            <Typography
-              sx={{ pt: 2 }}
-              component='h1'
-              variant='h3'
-              fontWeight='fontWeightMedium'
-              align='center'
-            >
-              The SocialLens 🔎
-            </Typography>
+          <Box
+            container
+            m='auto'
+            display='flex'
+            spacing={0}
+            alignItems='center'
+            justifyContent='center'
+          >
+            <Container maxWidth='md' align='center'>
+              <Typography
+                sx={{ pt: 2 }}
+                component='h1'
+                variant='h3'
+                fontWeight='fontWeightMedium'
+                align='center'
+                color='text.primary'
+                gutterBottom
+              >
+                The{' '}
+                <Box color='primary.main' display='inline'>
+                  SocialLens 🔎
+                </Box>
+              </Typography>
+
+              <Typography
+                sx={{ pt: 2 }}
+                component='h1'
+                variant='h5'
+                fontWeight='fontWeightLight'
+                align='center'
+              >
+                Enter your query:
+              </Typography>
+
+              <Paper
+                component='form'
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: 400,
+                  marginTop: 2,
+                  marginBottom: 2,
+                }}
+              >
+                <TextField
+                  sx={{ ml: 0, flex: 1, fontSize: 25 }}
+                  placeholder='Search'
+                  type='text'
+                  onChange={getData}
+                />
+
+                <IconButton sx={{ p: '10px' }} onClick={onSubmit} disableRipple>
+                  <SearchIcon />
+                </IconButton>
+              </Paper>
+            </Container>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            background: 'linear-gradient(to bottom, #ffede4, #ffede4)',
+          }}
+        >
+          {loading ? (
             <Typography
               sx={{ pt: 2 }}
               component='h1'
@@ -205,566 +291,635 @@ export default function CardPage(props) {
               fontWeight='fontWeightLight'
               align='center'
             >
-              Enter your query:
+              Loading...
             </Typography>
+          ) : null}
+          <Box maxWidth='xl' align='center'>
+            <Box align='center' m='auto' style={{ width: '100%' }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  p: 2,
+                  m: 0,
+                  background: 'linear-gradient(to bottom, #ffede4, #ffede4)',
+                  borderRadius: 3,
+                }}
+              >
+                <Masonry
+                  breakpointCols={4}
+                  columnClassName={m_styles.mymasonrygrid_column}
+                  className={m_styles.mymasonrygrid}
+                >
+                  {posts.map((post, index) => {
+                    const Network = post.network;
+                    const Sentiment = post.sentiment;
 
-            <Paper
-              component='form'
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                width: 400,
-                marginTop: 2,
-                marginBottom: 2,
-              }}
-            >
-              <TextField
-                sx={{ ml: 0, flex: 1, fontSize: 25 }}
-                placeholder='Search'
-                type='text'
-                onChange={getData}
-              />
+                    return (
+                      <div align='left'>
+                        {Sentiment === 'positive' ? (
+                          <CardActionArea href={post.url} target='_blank'>
+                            <Item
+                              key={index}
+                              sx={{
+                                background:
+                                  'linear-gradient(to bottom, #fff, #fff)',
+                                boxShadow: 4,
+                                borderColor: 'lightgreen',
+                                borderRadius: 2,
+                                border: '4px solid',
+                                borderRight: 0,
+                                borderLeft: 0,
+                              }}
+                            >
+                              <Paper
+                                variant='outlined'
+                                square
+                                sx={{
+                                  p: 0.3,
 
-              <IconButton sx={{ p: '10px' }} onClick={onSubmit} disableRipple>
-                <SearchIcon />
-              </IconButton>
-            </Paper>
-          </Container>
-        </Box>
-      </Box>
+                                  background:
+                                    'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(226,226,226,1) 100%)',
+                                }}
+                              >
+                                <CardHeader
+                                  sx={{
+                                    p: 1,
+                                  }}
+                                  avatar={
+                                    <Avatar
+                                      alt='Remy Sharp'
+                                      src={post.user.image}
+                                    />
+                                  }
+                                  action={
+                                    <Typography sx={{ textAlign: 'center' }}>
+                                      {Network === 'twitter' ? (
+                                        <Typography
+                                          color='#00acee'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <TwitterIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'facebook' ? (
+                                        <Typography
+                                          color='#3b5998'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <FacebookIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'youtube' ? (
+                                        <Typography
+                                          color='#FF0000'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <YouTubeIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'instagram' ? (
+                                        <Typography
+                                          color='#833AB4'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <InstagramIcon
+                                            sx={{ fontSize: 36 }}
+                                          />
+                                        </Typography>
+                                      ) : Network === 'reddit' ? (
+                                        <Typography
+                                          color='#FF4500'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <RedditIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'tumblr' ? (
+                                        <Typography
+                                          color='#34526f'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'flickr' ? (
+                                        <Typography
+                                          color='#0063dc'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'dailymotion' ? (
+                                        <Typography
+                                          color='#00d2f3'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'vimeo' ? (
+                                        <Typography
+                                          color='#86c9ef'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'vkontakte' ? (
+                                        <Typography
+                                          color='#4C75A3'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'web' ? (
+                                        <Typography
+                                          color='black'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : (
+                                        <Typography
+                                          color='black'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      )}
+                                    </Typography>
+                                  }
+                                  title={
+                                    <Typography
+                                      sx={{ fontSize: 15, fontWeight: 'bold' }}
+                                      color='text.primary'
+                                      style={{ overflowWrap: 'break-word' }}
+                                    >
+                                      {post.user.name}
+                                    </Typography>
+                                  }
+                                  subheader={post.posted.substr(0, 19)}
+                                />
+                                <Typography
+                                  sx={{ p: 0.5, fontSize: 14 }}
+                                  color='text.secondary'
+                                  style={{ overflowWrap: 'break-word' }}
+                                >
+                                  {post.user.description}
+                                </Typography>
+                              </Paper>
+                              <Typography gutterBottom>
+                                <></>
+                              </Typography>
 
-      <Box
-        sx={{
-          background: 'linear-gradient(to bottom, #ffede4, #ffede4)',
-        }}
-      >
-        <Typography
-          sx={{ pt: 2 }}
-          component='h1'
-          variant='h5'
-          fontWeight='fontWeightLight'
-          align='center'
-        >
-          {loading ? 'Loading...' : null}
-        </Typography>
+                              {post.image ? (
+                                <CardMedia
+                                  component='img'
+                                  height='150'
+                                  image={post.image}
+                                />
+                              ) : null}
 
-        <Box m='auto' style={{ width: '100%' }}>
+                              <Typography
+                                pt={1}
+                                sx={{ fontSize: 14 }}
+                                color='text.primary'
+                                style={{ overflowWrap: 'break-word' }}
+                                gutterBottom
+                              >
+                                {post.text}
+                              </Typography>
+
+                              {/*
+                        <div>
+                          <button
+                            aria-describedby={id}
+                            type='button'
+                            onClick={handleClick}
+                          >
+                            More Info
+                          </button>
+                          <Popper id={id} open={open} anchorEl={anchorEl}>
+                            <Box
+                              sx={{
+                                border: 1,
+                                p: 1,
+                                bgcolor: 'background.paper',
+                              }}
+                            >
+                              {post.user.name}
+                            </Box>
+                          </Popper>
+                        </div>
+                        */}
+                            </Item>
+                          </CardActionArea>
+                        ) : Sentiment === 'negative' ? (
+                          <CardActionArea href={post.url} target='_blank'>
+                            <Item
+                              key={index}
+                              sx={{
+                                background: 'linear-gradient(#fff, #fff)',
+                                boxShadow: 4,
+                                borderColor: 'lightcoral',
+                                borderRadius: 2,
+                                border: '4px solid',
+                                borderRight: 0,
+                                borderLeft: 0,
+                              }}
+                            >
+                              <Paper
+                                variant='outlined'
+                                square
+                                sx={{
+                                  p: 0.3,
+                                  background:
+                                    'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(226,226,226,1) 100%)',
+                                }}
+                              >
+                                <CardHeader
+                                  sx={{
+                                    p: 1,
+                                  }}
+                                  avatar={
+                                    <Avatar
+                                      alt='Remy Sharp'
+                                      src={post.user.image}
+                                    />
+                                  }
+                                  action={
+                                    <Typography sx={{ textAlign: 'center' }}>
+                                      {Network === 'twitter' ? (
+                                        <Typography
+                                          color='#00acee'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <TwitterIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'facebook' ? (
+                                        <Typography
+                                          color='#3b5998'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <FacebookIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'youtube' ? (
+                                        <Typography
+                                          color='#FF0000'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <YouTubeIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'instagram' ? (
+                                        <Typography
+                                          color='#833AB4'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <InstagramIcon
+                                            sx={{ fontSize: 36 }}
+                                          />
+                                        </Typography>
+                                      ) : Network === 'reddit' ? (
+                                        <Typography
+                                          color='#FF4500'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <RedditIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'tumblr' ? (
+                                        <Typography
+                                          color='#34526f'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'flickr' ? (
+                                        <Typography
+                                          color='#0063dc'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'dailymotion' ? (
+                                        <Typography
+                                          color='#00d2f3'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'vimeo' ? (
+                                        <Typography
+                                          color='#86c9ef'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'vkontakte' ? (
+                                        <Typography
+                                          color='#4C75A3'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'web' ? (
+                                        <Typography
+                                          color='black'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : (
+                                        <Typography
+                                          color='black'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      )}
+                                    </Typography>
+                                  }
+                                  title={
+                                    <Typography
+                                      sx={{ fontSize: 15, fontWeight: 'bold' }}
+                                      color='text.primary'
+                                      style={{ overflowWrap: 'break-word' }}
+                                    >
+                                      {post.user.name}
+                                    </Typography>
+                                  }
+                                  subheader={post.posted.substr(0, 19)}
+                                />
+                                <Typography
+                                  sx={{ p: 0.5, fontSize: 14 }}
+                                  color='text.secondary'
+                                  style={{ overflowWrap: 'break-word' }}
+                                >
+                                  {post.user.description}
+                                </Typography>
+                              </Paper>
+                              <Typography gutterBottom>
+                                <></>
+                              </Typography>
+
+                              {post.image ? (
+                                <CardMedia
+                                  component='img'
+                                  height='150'
+                                  image={post.image}
+                                />
+                              ) : null}
+
+                              <Typography
+                                pt={1}
+                                sx={{ fontSize: 14 }}
+                                color='text.primary'
+                                style={{ overflowWrap: 'break-word' }}
+                                gutterBottom
+                              >
+                                {post.text}
+                              </Typography>
+
+                              {/*
+                        <div>
+                          <button
+                            aria-describedby={id}
+                            type='button'
+                            onClick={handleClick}
+                          >
+                            More Info
+                          </button>
+                          <Popper id={id} open={open} anchorEl={anchorEl}>
+                            <Box
+                              sx={{
+                                border: 1,
+                                p: 1,
+                                bgcolor: 'background.paper',
+                              }}
+                            >
+                              {post.user.name}
+                            </Box>
+                          </Popper>
+                        </div>
+                        */}
+                            </Item>
+                          </CardActionArea>
+                        ) : (
+                          <CardActionArea href={post.url} target='_blank'>
+                            <Item
+                              key={index}
+                              sx={{
+                                background: 'linear-gradient(#fff, #fff)',
+                                boxShadow: 4,
+                                borderColor: 'grey.500',
+                                borderRadius: 2,
+                                border: '4px solid',
+                                borderRight: 0,
+                                borderLeft: 0,
+                              }}
+                            >
+                              <Paper
+                                variant='outlined'
+                                square
+                                sx={{
+                                  p: 0.3,
+                                  background:
+                                    'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(226,226,226,1) 100%)',
+                                }}
+                              >
+                                <CardHeader
+                                  sx={{
+                                    p: 1,
+                                  }}
+                                  avatar={
+                                    <Avatar
+                                      alt='Remy Sharp'
+                                      src={post.user.image}
+                                    />
+                                  }
+                                  action={
+                                    <Typography sx={{ textAlign: 'center' }}>
+                                      {Network === 'twitter' ? (
+                                        <Typography
+                                          color='#00acee'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <TwitterIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'facebook' ? (
+                                        <Typography
+                                          color='#3b5998'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <FacebookIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'youtube' ? (
+                                        <Typography
+                                          color='#FF0000'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <YouTubeIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'instagram' ? (
+                                        <Typography
+                                          color='#833AB4'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <InstagramIcon
+                                            sx={{ fontSize: 36 }}
+                                          />
+                                        </Typography>
+                                      ) : Network === 'reddit' ? (
+                                        <Typography
+                                          color='#FF4500'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          <RedditIcon sx={{ fontSize: 36 }} />
+                                        </Typography>
+                                      ) : Network === 'tumblr' ? (
+                                        <Typography
+                                          color='#34526f'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'flickr' ? (
+                                        <Typography
+                                          color='#0063dc'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'dailymotion' ? (
+                                        <Typography
+                                          color='#00d2f3'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'vimeo' ? (
+                                        <Typography
+                                          color='#86c9ef'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'vkontakte' ? (
+                                        <Typography
+                                          color='#4C75A3'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : Network === 'web' ? (
+                                        <Typography
+                                          color='black'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      ) : (
+                                        <Typography
+                                          color='black'
+                                          sx={{ fontSize: 24 }}
+                                        >
+                                          {post.network}
+                                        </Typography>
+                                      )}
+                                    </Typography>
+                                  }
+                                  title={
+                                    <Typography
+                                      sx={{ fontSize: 15, fontWeight: 'bold' }}
+                                      color='text.primary'
+                                      style={{ overflowWrap: 'break-word' }}
+                                    >
+                                      {post.user.name}
+                                    </Typography>
+                                  }
+                                  subheader={post.posted.substr(0, 19)}
+                                />
+                                <Typography
+                                  sx={{ p: 0.5, fontSize: 14 }}
+                                  color='text.secondary'
+                                  style={{ overflowWrap: 'break-word' }}
+                                >
+                                  {post.user.description}
+                                </Typography>
+                              </Paper>
+                              <Typography gutterBottom>
+                                <></>
+                              </Typography>
+
+                              {post.image ? (
+                                <CardMedia
+                                  component='img'
+                                  height='150'
+                                  image={post.image}
+                                />
+                              ) : null}
+
+                              <Typography
+                                pt={1}
+                                sx={{ fontSize: 14 }}
+                                color='text.primary'
+                                style={{ overflowWrap: 'break-word' }}
+                                gutterBottom
+                              >
+                                {post.text}
+                              </Typography>
+
+                              {/* 
+                        <div>
+                          <button
+                            aria-describedby={id}
+                            type='button'
+                            onClick={handleClick}
+                          >
+                            More Info
+                          </button>
+                          <Popper id={id} open={open} anchorEl={anchorEl}>
+                            <Box
+                              sx={{
+                                border: 1,
+                                p: 1,
+                                bgcolor: 'background.paper',
+                              }}
+                            >
+                              {post.user.name}
+                            </Box>
+                          </Popper>
+                        </div>
+                        */}
+                            </Item>
+                          </CardActionArea>
+                        )}
+                      </div>
+                    );
+                  })}
+                </Masonry>
+              </Box>
+            </Box>
+          </Box>
           <Box
             sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              p: 2,
+              display: 'flex',
+              justifyContent: 'center',
+              p: 3,
               m: 0,
-              background: 'linear-gradient(to bottom, #ffede4, #ffede4)',
-              borderRadius: 3,
+              bgcolor: 'fff',
             }}
           >
-            <Masonry
-              breakpointCols={4}
-              columnClassName={m_styles.mymasonrygrid_column}
-              className={m_styles.mymasonrygrid}
-            >
-              {posts.map((post, index) => {
-                const Network = post.network;
-                const Sentiment = post.sentiment;
-
-                return (
-                  <div>
-                    {Sentiment === 'positive' ? (
-                      <Item
-                        key={index}
-                        sx={{
-                          background: 'linear-gradient(to bottom, #fff, #fff)',
-                          boxShadow: 4,
-                          borderColor: 'lightgreen',
-                          borderRadius: 2,
-                          border: '4px solid',
-                        }}
-                      >
-                        <CardContent key={post.postid}>
-                          <CardHeader
-                            avatar={
-                              <Avatar alt='Remy Sharp' src={post.user.image} />
-                            }
-                            action={
-                              <Typography sx={{ textAlign: 'center' }}>
-                                {Network === 'twitter' ? (
-                                  <Typography
-                                    color='#00acee'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <TwitterIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'facebook' ? (
-                                  <Typography
-                                    color='#3b5998'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <FacebookIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'youtube' ? (
-                                  <Typography
-                                    color='#FF0000'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <YouTubeIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'instagram' ? (
-                                  <Typography
-                                    color='#833AB4'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <InstagramIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'reddit' ? (
-                                  <Typography
-                                    color='#FF4500'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <RedditIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'tumblr' ? (
-                                  <Typography
-                                    color='#34526f'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'flickr' ? (
-                                  <Typography
-                                    color='#0063dc'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'dailymotion' ? (
-                                  <Typography
-                                    color='#00d2f3'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'vimeo' ? (
-                                  <Typography
-                                    color='#86c9ef'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'vkontakte' ? (
-                                  <Typography
-                                    color='#4C75A3'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'web' ? (
-                                  <Typography
-                                    color='black'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : (
-                                  <Typography
-                                    color='black'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                )}
-                              </Typography>
-                            }
-                            title={post.user.name}
-                            subheader={post.posted.substr(0, 19)}
-                          />
-                          <Divider sx={{ m: 1 }} variant='middle' />
-
-                          {post.image ? (
-                            <CardMedia
-                              component='img'
-                              height='150'
-                              image={post.image}
-                            />
-                          ) : null}
-                          <br />
-                          <Typography
-                            sx={{ fontSize: 14 }}
-                            color='text.secondary'
-                            gutterBottom
-                          >
-                            {post.text}
-                          </Typography>
-                          <br />
-                          <Link href={post.url}>
-                            {post.url.substr(0, 30)}...
-                          </Link>
-
-                          {/*
-                        <div>
-                          <button
-                            aria-describedby={id}
-                            type='button'
-                            onClick={handleClick}
-                          >
-                            More Info
-                          </button>
-                          <Popper id={id} open={open} anchorEl={anchorEl}>
-                            <Box
-                              sx={{
-                                border: 1,
-                                p: 1,
-                                bgcolor: 'background.paper',
-                              }}
-                            >
-                              {post.user.name}
-                            </Box>
-                          </Popper>
-                        </div>
-                        */}
-                        </CardContent>
-                      </Item>
-                    ) : Sentiment === 'negative' ? (
-                      <Item
-                        key={index}
-                        sx={{
-                          background: 'linear-gradient(#fff, #fff)',
-                          boxShadow: 4,
-                          borderColor: 'lightcoral',
-                          borderRadius: 2,
-                          border: '4px solid',
-                        }}
-                      >
-                        <CardContent key={post.postid}>
-                          <CardHeader
-                            avatar={
-                              <Avatar alt='Remy Sharp' src={post.user.image} />
-                            }
-                            action={
-                              <Typography sx={{ textAlign: 'center' }}>
-                                {Network === 'twitter' ? (
-                                  <Typography
-                                    color='#00acee'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <TwitterIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'facebook' ? (
-                                  <Typography
-                                    color='#3b5998'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <FacebookIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'youtube' ? (
-                                  <Typography
-                                    color='#FF0000'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <YouTubeIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'instagram' ? (
-                                  <Typography
-                                    color='#833AB4'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <InstagramIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'reddit' ? (
-                                  <Typography
-                                    color='#FF4500'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <RedditIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'tumblr' ? (
-                                  <Typography
-                                    color='#34526f'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'flickr' ? (
-                                  <Typography
-                                    color='#0063dc'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'dailymotion' ? (
-                                  <Typography
-                                    color='#00d2f3'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'vimeo' ? (
-                                  <Typography
-                                    color='#86c9ef'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'vkontakte' ? (
-                                  <Typography
-                                    color='#4C75A3'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'web' ? (
-                                  <Typography
-                                    color='black'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : (
-                                  <Typography
-                                    color='black'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                )}
-                              </Typography>
-                            }
-                            title={post.user.name}
-                            subheader={post.posted.substr(0, 19)}
-                          />
-                          <Divider sx={{ m: 1 }} variant='middle' />
-
-                          {post.image ? (
-                            <CardMedia
-                              component='img'
-                              height='150'
-                              image={post.image}
-                            />
-                          ) : null}
-                          <br />
-
-                          <Typography
-                            sx={{ fontSize: 14 }}
-                            color='text.secondary'
-                            gutterBottom
-                          >
-                            {post.text}
-                          </Typography>
-                          <br />
-                          <Link href={post.url}>
-                            {post.url.substr(0, 30)}...
-                          </Link>
-
-                          {/*
-                        <div>
-                          <button
-                            aria-describedby={id}
-                            type='button'
-                            onClick={handleClick}
-                          >
-                            More Info
-                          </button>
-                          <Popper id={id} open={open} anchorEl={anchorEl}>
-                            <Box
-                              sx={{
-                                border: 1,
-                                p: 1,
-                                bgcolor: 'background.paper',
-                              }}
-                            >
-                              {post.user.name}
-                            </Box>
-                          </Popper>
-                        </div>
-                        */}
-                        </CardContent>
-                      </Item>
-                    ) : (
-                      <Item
-                        key={index}
-                        sx={{
-                          background: 'linear-gradient(#fff, #fff)',
-                          boxShadow: 4,
-                          borderColor: 'grey.500',
-                          borderRadius: 2,
-                          border: '4px solid',
-                        }}
-                      >
-                        <CardContent key={post.postid}>
-                          <CardHeader
-                            avatar={
-                              <Avatar alt='Remy Sharp' src={post.user.image} />
-                            }
-                            action={
-                              <Typography sx={{ textAlign: 'center' }}>
-                                {Network === 'twitter' ? (
-                                  <Typography
-                                    color='#00acee'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <TwitterIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'facebook' ? (
-                                  <Typography
-                                    color='#3b5998'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <FacebookIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'youtube' ? (
-                                  <Typography
-                                    color='#FF0000'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <YouTubeIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'instagram' ? (
-                                  <Typography
-                                    color='#833AB4'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <InstagramIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'reddit' ? (
-                                  <Typography
-                                    color='#FF4500'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    <RedditIcon sx={{ fontSize: 36 }} />
-                                  </Typography>
-                                ) : Network === 'tumblr' ? (
-                                  <Typography
-                                    color='#34526f'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'flickr' ? (
-                                  <Typography
-                                    color='#0063dc'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'dailymotion' ? (
-                                  <Typography
-                                    color='#00d2f3'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'vimeo' ? (
-                                  <Typography
-                                    color='#86c9ef'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'vkontakte' ? (
-                                  <Typography
-                                    color='#4C75A3'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : Network === 'web' ? (
-                                  <Typography
-                                    color='black'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                ) : (
-                                  <Typography
-                                    color='black'
-                                    sx={{ fontSize: 24 }}
-                                  >
-                                    {post.network}
-                                  </Typography>
-                                )}
-                              </Typography>
-                            }
-                            title={post.user.name}
-                            subheader={post.posted.substr(0, 19)}
-                          />
-                          <Divider sx={{ m: 1 }} variant='middle' />
-
-                          {post.image ? (
-                            <CardMedia
-                              component='img'
-                              height='150'
-                              image={post.image}
-                            />
-                          ) : null}
-
-                          <br />
-
-                          <Typography
-                            sx={{ fontSize: 14 }}
-                            color='text.secondary'
-                            gutterBottom
-                          >
-                            {post.text}
-                          </Typography>
-                          <br />
-                          <Link href={post.url}>
-                            {post.url.substr(0, 30)}...
-                          </Link>
-
-                          {/* 
-                        <div>
-                          <button
-                            aria-describedby={id}
-                            type='button'
-                            onClick={handleClick}
-                          >
-                            More Info
-                          </button>
-                          <Popper id={id} open={open} anchorEl={anchorEl}>
-                            <Box
-                              sx={{
-                                border: 1,
-                                p: 1,
-                                bgcolor: 'background.paper',
-                              }}
-                            >
-                              {post.user.name}
-                            </Box>
-                          </Popper>
-                        </div>
-                        */}
-                        </CardContent>
-                      </Item>
-                    )}
-                  </div>
-                );
-              })}
-            </Masonry>
+            {page ? (
+              <Paper variant='outlined'>
+                <Pagination
+                  sx={{
+                    marginTop: 1,
+                    marginBottom: 1,
+                    marginRight: 1,
+                    marginLeft: 1,
+                  }}
+                  count={10}
+                  variant='outlined'
+                />
+              </Paper>
+            ) : null}
           </Box>
         </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            p: 3,
-            m: 0,
-            bgcolor: 'fff',
-          }}
-        >
-          <Paper variant='outlined'>
-            <Pagination
-              sx={{
-                marginTop: 1,
-                marginBottom: 1,
-                marginRight: 1,
-                marginLeft: 1,
-              }}
-              count={10}
-              variant='outlined'
-            />
-          </Paper>
-        </Box>
-      </Box>
-    </div>
+      </div>
+    </ThemeProvider>
   );
 }

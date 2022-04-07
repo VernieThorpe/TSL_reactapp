@@ -26,7 +26,7 @@ function App() {
         <Route path='/user/:id' element={<CardPage />} />
         <Route path='/SignIn' element={<SignIn />} />
         <Route path='/SignUp' element={<SignUp />} />
-        <Route path='/CardPage' element={<CardPage />} />
+        <Route path='/card-page' element={<CardPage />} />
         <Route path='/CardPage2' element={<CardPage2 />} />
         <Route path='/TestCardPage' element={<TestCardPage />} />
         <Route path='/Users' element={<Users />} />

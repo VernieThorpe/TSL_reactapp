@@ -73,16 +73,15 @@ const NavBar = () => {
             </Link>
           </Typography>
 
-          <Button href='/CardPage' color='inherit'>
-            <ManageSearchIcon />
-            Search
-          </Button>
-
           {auth && (
             <div>
               <Button color='inherit'>
                 {isAuthenticated && (
                   <div>
+                    <Button href='/card-page' color='inherit'>
+                      <ManageSearchIcon />
+                      Search
+                    </Button>
                     <Button href='/Profile' color='inherit'>
                       <AccountBoxIcon />
                       Profile

@@ -95,7 +95,7 @@ export default function Home() {
         {/* Hero unit, bgcolor: "background.paper", */}
         <Box
           sx={{
-            background: 'linear-gradient(to top, #ffede4, #f1f1f1)',
+            background: 'linear-gradient(to top, #ffede4, #fff)',
             pt: 8,
             pb: 6,
           }}
@@ -156,12 +156,12 @@ export default function Home() {
                     )}
                     {isAuthenticated && (
                       <Button
-                        onClick={() => logout()}
-                        variant='outlined'
+                        href='/card-page'
+                        variant='contained'
                         size='large'
                         fullWidth='true'
                       >
-                        Sign Out
+                        Start Searching
                       </Button>
                     )}
                   </div>
